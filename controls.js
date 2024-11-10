@@ -122,5 +122,48 @@ AFRAME.registerComponent('oculus-thumbstick-controls', {
     },
     remove: function () {
         this.el.removeEventListener('thumbstickmoved', this.thumbstickMoved);
-    }
+    },
+    
 });
+
+AFRAME.registerComponent('manipulate-object', {
+    init: function () {
+      this.selectedObject = null;
+      this.isDragging = false;
+  
+      // Nastavení laserového výběru
+      this.el.addEventListener('raycaster-intersected', (event) => {
+        this.raycaster = event.detail.el;
+      });
+  
+      this.el.addEventListener('raycaster-intersected-cleared', () => {
+        this.raycaster = null;
+      });
+  
+      // Vybrání objektu při stisku trigger
+      this.el.addEventListener('triggerdown', () => {
+        if (this.raycaster) {
+          let intersectedEl = this.raycaster.components.raycaster.getIntersection(this.el);
+          if (intersectedEl && intersectedEl.el.classList.contains('draggable')) {
+            this.selectedObject = intersectedEl.el;
+            this.isDragging = true;
+          }
+        }
+      });
+  
+      // Zrušení výběru objektu při uvolnění triggeru
+      this.el.addEventListener('triggerup', () => {
+        this.isDragging = false;
+        this.selectedObject = null;
+      });
+    },
+  
+    tick: function () {
+      // Přemístění objektu podle pozice ovladače
+      if (this.isDragging && this.selectedObject) {
+        let controllerPosition = this.el.object3D.position;
+        this.selectedObject.object3D.position.copy(controllerPosition);
+      }
+    }
+  });
+  

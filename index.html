@@ -24,13 +24,15 @@
       <a-entity shadow="cast:true; receive:true">
         <!-- Adds shadows for objects inside -->
 
-        <a-entity scale="1 .7 1">
+        <a-entity 
+            id="pumpkin"
+            class="draggable"
+            position="0 1.17 -6"
+            scale="1 .7 1">
           <!-- Squash the pumpkin vertically -->
 
           <!-- Pumpkin -->
           <a-sphere
-            id="pumpkin"
-            position="0 1.65 -6"
             radius=".25"
             color="#e67d0e"
             rotation="0 -90 0"
@@ -42,18 +44,18 @@
             color="green"
             height=".2"
             radius=".02"
-            position="0 1.9 -6"
+            position="0 0.3 0"
             rotation="0 0 -25"
           ></a-cylinder>
         </a-entity>
 
         <!-- Table top -->
+        <a-entity id="table" class="draggable" position="0 1 -6">        
         <a-box
           color="saddlebrown"
           depth="1"
           height=".05"
           width="1"
-          position="0 1 -6"
         ></a-box>
 
         <!-- Table legs -->
@@ -62,37 +64,28 @@
           depth="0.1"
           height="1"
           width="0.1"
-          position="-0.45 0.5 -5.55"
+          position="-0.45 -0.5 -0.55"
         ></a-box>
         <a-box
           color="saddlebrown"
           depth="0.1"
           height="1"
           width="0.1"
-          position="0.45 0.5 -5.55"
+          position="0.45 -0.5 -0.55"
         ></a-box>
         <a-box
           color="saddlebrown"
           depth="0.1"
           height="1"
           width="0.1"
-          position="-0.45 0.5 -6.45"
+          position="-0.45 -0.5 0.45"
         ></a-box>
         <a-box
           color="saddlebrown"
           depth="0.1"
           height="1"
           width="0.1"
-          position="0.45 0.5 -6.45"
-        ></a-box>
-        <a-box
-          color="saddlebrown"
-          material="opacity: 0.5; transparent: true;"
-          depth="0.1"
-          height="0.5"
-          width="0.1"
-          position="0.45 0.5 -6.45"
-          opacity="1"
+          position="0.45 -0.5 0.45"
         ></a-box>
       </a-entity>
 
@@ -104,7 +97,7 @@
         ></a-entity>
         <a-entity
           oculus-touch-controls="hand: right"
-          oculus-thumbstick-controls
+          oculus-thumbstick-controls manipulate-object
         ></a-entity>
         <a-entity laser-controls="hand: left"></a-entity>
         <a-entity laser-controls="hand: right"></a-entity>
