@@ -92,15 +92,18 @@
       <!-- Controls for Meta quest and similar headsets -->
       <a-entity id="rig">
         <a-camera position="0 1.2 1"></a-camera>
-        <a-entity oculus-touch-controls="hand: left"
-          oculus-thumbstick-controls
-        ></a-entity>
-        <a-entity
+        <a-camera></a-camera>
+        <a-entity 
+          oculus-touch-controls="hand: left"
+          oculus-thumbstick-controls="rigSelector: #rig">
+        </a-entity>
+        <a-entity 
           oculus-touch-controls="hand: right"
-          oculus-thumbstick-controls
-        ></a-entity>
-        <a-entity laser-controls="hand: left"></a-entity>
-        <a-entity laser-controls="hand: right"></a-entity>
+          oculus-thumbstick-controls="rigSelector: #rig"
+          raycaster="objects: .draggable; far: 100"
+          manipulate-object
+          laser-controls>
+        </a-entity>
       </a-entity>
 
     </a-scene>
