@@ -16,6 +16,8 @@ AFRAME.registerComponent('oculus-thumbstick-controls', {
         this.easing = 1.1;
         this.velocity = new THREE.Vector3(0, 0, 0);
         this.tsData = new THREE.Vector2(0, 0);
+        this.controllerData = document.querySelector("#controller-data").components["controller-listener"];
+		this.text = "";        
 
         this.thumbstickMoved = this.thumbstickMoved.bind(this);
         this.el.addEventListener('thumbstickmoved', this.thumbstickMoved);
@@ -37,6 +39,26 @@ AFRAME.registerComponent('oculus-thumbstick-controls', {
         if (!velocity[data.adAxis] && !velocity[data.wsAxis]) { return; }
 
         el.object3D.position.add(this.getMovementVector(delta));
+
+		this.text = 
+		           "Left Controller:" + "\n" +
+		           "Joystick X: " + this.controllerData.leftAxisX + "\n" +
+		           "Joystick Y: " + this.controllerData.leftAxisY + "\n" + 
+		           "[Y] Button: " + this.controllerData.buttonY.pressing + "\n" +
+		           "[X] Button: " + this.controllerData.buttonX.pressing + "\n" +
+		           "   Trigger: " + this.controllerData.leftTrigger.pressing + "\n" +
+		           "      Grip: " + this.controllerData.leftGrip.pressing + "\n" +
+		           "----------------------------------- \n" +
+		           "Right Controller:" + "\n" +
+		           "Joystick X: " + this.controllerData.rightAxisX + "\n" +
+		           "Joystick Y: " + this.controllerData.rightAxisY + "\n" +
+		           "[B] Button: " + this.controllerData.buttonB.pressing + "\n" +
+		           "[A] Button: " + this.controllerData.buttonA.pressing + "\n" +
+		           "   Trigger: " + this.controllerData.rightTrigger.pressing + "\n" +
+		           "      Grip: " + this.controllerData.rightGrip.pressing + "\n";
+		           
+		this.el.setAttribute( "text", "value", this.text );
+
     },
     updateVelocity: function (delta) {
         var acceleration;

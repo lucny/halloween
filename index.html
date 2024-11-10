@@ -13,8 +13,14 @@
     <a-scene shadow="type: pcfsoft;">
       <!-- Controls for Meta quest and similar headsets -->
       <a-entity id="rig">
-        <a-camera position="0 1.2 1"></a-camera>
+      <a-camera position="0 1.2 1"></a-camera>
+       <a-entity 
+	    id="controller-data" 
+	    controller-listener="leftControllerId:  #leftHand; 
+	                         rightControllerId: #rightHand">
+	    </a-entity>
         <a-entity 
+          id="leftHand"
           oculus-touch-controls="hand: left"
           oculus-thumbstick-controls="rigSelector: #rig">
         </a-entity>
@@ -99,6 +105,16 @@
           </a-box>
         </a-entity>
       </a-entity>
+      <a-entity
+            id="textArea"
+            position="0 2.5 -6.9"
+            geometry="primitive: plane;  width: 3; height: auto"
+            material="color: #444444; transparent: true; opacity: 0.80;"
+            text="anchor: center; baseline: center; wrapCount: 40;
+                    transparent: true; opacity: 0.90; color: #8888FF;
+                    value: 1 \n 2 \n 3 \n 4"
+            text-display>
+        </a-entity>
     </a-scene>
   </body>
 </html>
