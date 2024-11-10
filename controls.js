@@ -111,20 +111,21 @@ AFRAME.registerComponent('manipulate-object', {
     init: function () {
         this.selectedObject = null;
         this.isDragging = false;
-        this.offset = new THREE.Vector3();
+        this.originalPosition = new THREE.Vector3();
+        this.originalParent = null;
         
-        // Laserový paprsek pro vizuální zpětnou vazbu
+        // Nastavení raycaster line
         this.el.setAttribute('line', {
             color: '#FF0000',
-            opacity: 0.5,
+            opacity: 0.75,
             visible: true
         });
 
-        // Sledování průsečíků s objekty
+        // Sledování průsečíků
         this.el.addEventListener('raycaster-intersection', (evt) => {
             if (!this.isDragging) {
-                const intersection = evt.detail.intersections[0];
-                if (intersection.object.el.classList.contains('draggable')) {
+                const intersectedEl = evt.detail.els[0];
+                if (intersectedEl && intersectedEl.classList.contains('draggable')) {
                     this.el.setAttribute('line', 'color', '#00FF00');
                 }
             }
@@ -137,40 +138,47 @@ AFRAME.registerComponent('manipulate-object', {
         });
 
         // Uchopení objektu
-        this.el.addEventListener('triggerdown', (evt) => {
-            const intersection = this.el.components.raycaster.getIntersection(this.el);
-            if (intersection && intersection.object.el.classList.contains('draggable')) {
-                this.selectedObject = intersection.object.el;
-                this.isDragging = true;
-                
-                // Výpočet offsetu mezi pozicí ovladače a objektu
-                const objectWorldPosition = new THREE.Vector3();
-                this.selectedObject.object3D.getWorldPosition(objectWorldPosition);
-                const controllerWorldPosition = new THREE.Vector3();
-                this.el.object3D.getWorldPosition(controllerWorldPosition);
-                this.offset.subVectors(objectWorldPosition, controllerWorldPosition);
-                
-                // Vizuální zpětná vazba
-                this.el.setAttribute('line', 'color', '#0000FF');
+        this.el.addEventListener('triggerdown', () => {
+            const raycaster = this.el.components.raycaster;
+            const intersections = raycaster.intersectedEls;
+            
+            if (intersections.length > 0) {
+                const intersectedEl = intersections[0];
+                if (intersectedEl.classList.contains('draggable')) {
+                    this.selectedObject = intersectedEl;
+                    this.isDragging = true;
+                    
+                    // Uložení původní pozice a rodiče
+                    this.originalPosition.copy(this.selectedObject.object3D.position);
+                    this.originalParent = this.selectedObject.object3D.parent;
+                    
+                    // Připojení objektu k ovladači
+                    const worldPosition = new THREE.Vector3();
+                    this.selectedObject.object3D.getWorldPosition(worldPosition);
+                    this.el.object3D.worldToLocal(worldPosition);
+                    this.selectedObject.object3D.position.copy(worldPosition);
+                    this.el.object3D.add(this.selectedObject.object3D);
+                    
+                    // Vizuální zpětná vazba
+                    this.el.setAttribute('line', 'color', '#0000FF');
+                }
             }
         });
 
         // Puštění objektu
         this.el.addEventListener('triggerup', () => {
-            this.isDragging = false;
-            this.selectedObject = null;
-            this.el.setAttribute('line', 'color', '#FF0000');
+            if (this.isDragging && this.selectedObject) {
+                // Vrácení objektu do původní hierarchie
+                const worldPosition = new THREE.Vector3();
+                this.selectedObject.object3D.getWorldPosition(worldPosition);
+                this.originalParent.worldToLocal(worldPosition);
+                this.selectedObject.object3D.position.copy(worldPosition);
+                this.originalParent.add(this.selectedObject.object3D);
+                
+                this.isDragging = false;
+                this.selectedObject = null;
+                this.el.setAttribute('line', 'color', '#FF0000');
+            }
         });
-    },
-
-    tick: function () {
-        if (this.isDragging && this.selectedObject) {
-            const controllerPosition = new THREE.Vector3();
-            this.el.object3D.getWorldPosition(controllerPosition);
-            
-            // Aplikace offsetu pro zachování relativní pozice
-            const targetPosition = controllerPosition.clone().add(this.offset);
-            this.selectedObject.object3D.position.copy(targetPosition);
-        }
     }
 });
