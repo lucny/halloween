@@ -16,17 +16,14 @@
         <a-camera position="0 1.2 1"></a-camera>
         <a-entity 
           oculus-touch-controls="hand: left"
-          oculus-thumbstick-controls="rigSelector: #rig"
-          laser-controls="hand: left"
-          raycaster="far: 100; showLine: true; lineColor: green"
-          manipulate-object>
+          oculus-thumbstick-controls="rigSelector: #rig">
         </a-entity>
         <a-entity 
           id="rightHand"
           oculus-touch-controls="hand: right"
           oculus-thumbstick-controls="rigSelector: #rig"
           laser-controls="hand: right"
-          raycaster="far: 100; showLine: true; lineColor: red"
+          raycaster="objects: .draggable; far: 100; showLine: true; lineColor: red"
           manipulate-object>
         </a-entity>
       </a-entity>

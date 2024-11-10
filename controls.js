@@ -112,6 +112,13 @@ AFRAME.registerComponent('manipulate-object', {
         this.grabbed = null;
         this.grabOffset = new THREE.Vector3();
         
+        this.el.addEventListener('raycaster-intersected', () => {
+            const intersection = this.el.components.raycaster.getIntersection(this.el);
+            if (!intersection) return;
+            intersection.object.el.setAttribute('material', 'color', 'red');
+            intersection.object.el.object3D.position.y += 1;
+        });
+
         this.el.addEventListener('triggerdown', () => {
             const intersection = this.el.components.raycaster.getIntersection(this.el);
             if (!intersection) return;
