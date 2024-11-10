@@ -23,7 +23,7 @@
           oculus-touch-controls="hand: right"
           oculus-thumbstick-controls="rigSelector: #rig"
           laser-controls="hand: right"
-          raycaster="objects: .draggable; far: 100; showLine: true; lineColor: red"
+          raycaster="objects: .raycaster-target; far: 100; showLine: true; lineColor: red; interval: 0;"
           manipulate-object>
         </a-entity>
       </a-entity>
@@ -39,7 +39,8 @@
           id="pumpkin"
           class="draggable"
           position="0 1.17 -6"
-          scale="1 .7 1">
+          scale="1 .7 1"
+          raycaster-target>
           <!-- Pumpkin -->
           <a-sphere
             radius=".25"
@@ -59,7 +60,7 @@
         </a-entity>
 
         <!-- Table top -->
-        <a-entity id="table" class="draggable" position="0 1 -6">        
+        <a-entity id="table" class="draggable" position="0 1 -6" raycaster-target>        
           <a-box
             color="saddlebrown"
             depth="1"
