@@ -109,76 +109,38 @@ AFRAME.registerComponent('oculus-thumbstick-controls', {
 
 AFRAME.registerComponent('manipulate-object', {
     init: function () {
-        this.selectedObject = null;
-        this.isDragging = false;
-        this.originalPosition = new THREE.Vector3();
-        this.originalParent = null;
+        this.grabbed = null;
+        this.grabOffset = new THREE.Vector3();
         
-        // Nastavení raycaster line
-        this.el.setAttribute('line', {
-            color: '#FF0000',
-            opacity: 0.75,
-            visible: true
-        });
-
-        // Sledování průsečíků
-        this.el.addEventListener('raycaster-intersection', (evt) => {
-            if (!this.isDragging) {
-                const intersectedEl = evt.detail.els[0];
-                if (intersectedEl && intersectedEl.classList.contains('draggable')) {
-                    this.el.setAttribute('line', 'color', '#00FF00');
-                }
-            }
-        });
-
-        this.el.addEventListener('raycaster-intersection-cleared', () => {
-            if (!this.isDragging) {
-                this.el.setAttribute('line', 'color', '#FF0000');
-            }
-        });
-
-        // Uchopení objektu
         this.el.addEventListener('triggerdown', () => {
-            const raycaster = this.el.components.raycaster;
-            const intersections = raycaster.intersectedEls;
+            const intersection = this.el.components.raycaster.getIntersection(this.el);
+            if (!intersection) return;
             
-            if (intersections.length > 0) {
-                const intersectedEl = intersections[0];
-                if (intersectedEl.classList.contains('draggable')) {
-                    this.selectedObject = intersectedEl;
-                    this.isDragging = true;
-                    
-                    // Uložení původní pozice a rodiče
-                    this.originalPosition.copy(this.selectedObject.object3D.position);
-                    this.originalParent = this.selectedObject.object3D.parent;
-                    
-                    // Připojení objektu k ovladači
-                    const worldPosition = new THREE.Vector3();
-                    this.selectedObject.object3D.getWorldPosition(worldPosition);
-                    this.el.object3D.worldToLocal(worldPosition);
-                    this.selectedObject.object3D.position.copy(worldPosition);
-                    this.el.object3D.add(this.selectedObject.object3D);
-                    
-                    // Vizuální zpětná vazba
-                    this.el.setAttribute('line', 'color', '#0000FF');
-                }
+            const grabbedEl = intersection.object.el;
+            while (grabbedEl && !grabbedEl.classList.contains('draggable')) {
+                grabbedEl = grabbedEl.parentElement;
+            }
+            
+            if (grabbedEl && grabbedEl.classList.contains('draggable')) {
+                this.grabbed = grabbedEl;
+                // Vypočítat offset mezi pozicí ovladače a objektu
+                const worldPosition = new THREE.Vector3();
+                this.grabbed.object3D.getWorldPosition(worldPosition);
+                this.grabOffset.copy(worldPosition).sub(this.el.object3D.position);
             }
         });
 
-        // Puštění objektu
         this.el.addEventListener('triggerup', () => {
-            if (this.isDragging && this.selectedObject) {
-                // Vrácení objektu do původní hierarchie
-                const worldPosition = new THREE.Vector3();
-                this.selectedObject.object3D.getWorldPosition(worldPosition);
-                this.originalParent.worldToLocal(worldPosition);
-                this.selectedObject.object3D.position.copy(worldPosition);
-                this.originalParent.add(this.selectedObject.object3D);
-                
-                this.isDragging = false;
-                this.selectedObject = null;
-                this.el.setAttribute('line', 'color', '#FF0000');
-            }
+            this.grabbed = null;
         });
+    },
+
+    tick: function() {
+        if (!this.grabbed) return;
+
+        // Aktualizovat pozici drženého objektu
+        const controllerPosition = this.el.object3D.position;
+        const targetPosition = new THREE.Vector3().copy(controllerPosition).add(this.grabOffset);
+        this.grabbed.object3D.position.copy(targetPosition);
     }
 });
