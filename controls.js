@@ -16,11 +16,39 @@ AFRAME.registerComponent('oculus-thumbstick-controls', {
         this.easing = 1.1;
         this.velocity = new THREE.Vector3(0, 0, 0);
         this.tsData = new THREE.Vector2(0, 0);
+        this.selectedObject = null;
+        this.isDragging = false;
 
         this.thumbstickMoved = this.thumbstickMoved.bind(this)
-        this.triggerUp = this.triggerUp.bind(this)
+        /* this.triggerUp = this.triggerUp.bind(this) */
         this.el.addEventListener('thumbstickmoved', this.thumbstickMoved);
-        this.el.addEventListener('triggerup', this.triggerUp);
+        /* this.el.addEventListener('triggerup', this.triggerUp); */
+    
+        // Nastavení laserového výběru
+        this.el.addEventListener('raycaster-intersected', (event) => {
+          this.raycaster = event.detail.el;
+        });
+    
+        this.el.addEventListener('raycaster-intersected-cleared', () => {
+          this.raycaster = null;
+        });
+    
+        // Vybrání objektu při stisku trigger
+        this.el.addEventListener('triggerdown', () => {
+          if (this.raycaster) {
+            let intersectedEl = this.raycaster.components.raycaster.getIntersection(this.el);
+            if (intersectedEl && intersectedEl.el.classList.contains('draggable')) {
+              this.selectedObject = intersectedEl.el;
+              this.isDragging = true;
+            }
+          }
+        });
+    
+        // Zrušení výběru objektu při uvolnění triggeru
+        this.el.addEventListener('triggerup', () => {
+          this.isDragging = false;
+          this.selectedObject = null;
+        });        
     },
     update: function() {
         this.rigElement = document.querySelector(this.data.rigSelector)
@@ -41,6 +69,11 @@ AFRAME.registerComponent('oculus-thumbstick-controls', {
 
         // Get movement vector and translate position.
         el.object3D.position.add(this.getMovementVector(delta));
+        // Přemístění objektu podle pozice ovladače
+        if (this.isDragging && this.selectedObject) {
+            let controllerPosition = this.el.object3D.position;
+            this.selectedObject.object3D.position.copy(controllerPosition);
+        }        
     },
     updateVelocity: function (delta) {
         var acceleration;
@@ -113,13 +146,13 @@ AFRAME.registerComponent('oculus-thumbstick-controls', {
     thumbstickMoved: function (evt) {
         this.tsData.set(evt.detail.x, evt.detail.y);
     },
-    triggerUp: function (evt) {
+/*    triggerUp: function (evt) {
         this.tsData.set(0, 0);
         // změň barvu objektu pumpkin na červenou a jeho pozici v ose y o 1
         let pumpkin = document.querySelector("#pumpkin");
         pumpkin.setAttribute("material", "color", "red");
         pumpkin.object3D.position.y += 1;
-    },
+    },*/
     remove: function () {
         this.el.removeEventListener('thumbstickmoved', this.thumbstickMoved);
     },
